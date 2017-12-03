@@ -27,7 +27,21 @@ while true do
     
     io.close(dataFile);
 
-    client.screenshot("screenshot.png");
+    -- client.screenshot("screenshot.png");
+
+    local cmdFile = io.open("commands.txt", "r");
+    io.input(cmdFile);
+
+    joypad.set( 
+        {
+            Right = io.read() == "true" and true or false,
+            Left = io.read() == "true" and true or false,
+            Up = io.read() == "true" and true or false,
+            Down = io.read() == "true" and true or false,
+            A = io.read() == "true" and true or false,
+            B = io.read() == "true" and true or false
+        }, 1
+    );
 
     emu.frameadvance();
 end;

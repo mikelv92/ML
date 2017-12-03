@@ -1,5 +1,3 @@
-MarioPosition:1532,192
-Enemy0:1433,208
-Enemy1:1456,208
-Enemy2:1647,208
-Timestamp:1509211409101.4
+MarioPosition:259,192
+Enemy0:317,208
+Timestamp:1509227035313.7
