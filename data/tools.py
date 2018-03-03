@@ -5,6 +5,7 @@ import pygame as pg
 from pynput.keyboard import Key, Controller
 
 from .ai import AI
+import traceback
 
 keybinding = {
     'action':pg.K_s,
@@ -103,12 +104,11 @@ class Control(object):
                     'screenshot': pg.surfarray.array3d(pg.display.get_surface())
                 }
 
-                self.ai.publish_state(state)
+                self.ai.call_ai(state)
                 
             except Exception as e:
-                print(e)
-                
-
+                print(traceback.format_exc())
+            
 class _State(object):
     def __init__(self):
         self.start_time = 0.0
