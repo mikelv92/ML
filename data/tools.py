@@ -107,7 +107,8 @@ class Control(object):
                 self.ai.call_ai(state)
                 
             except Exception as e:
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
+                pass
             
 class _State(object):
     def __init__(self):
