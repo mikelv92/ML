@@ -101,7 +101,8 @@ class Control(object):
                     'mario_big': self.state.is_mario_big(),
                     'mario_invincible': self.state.is_mario_invincible(),
                     'mario_in_castle': self.state.is_mario_in_castle(),
-                    'screenshot': pg.surfarray.array3d(pg.display.get_surface())
+                    'screenshot': pg.surfarray.array3d(pg.display.get_surface()),
+                    'mario_x': self.state.mario.rect.x
                 }
 
                 self.ai.call_ai(state)

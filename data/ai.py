@@ -41,6 +41,9 @@ OBSERVATION_TIMESTEP = 3200
 FRAME_PER_ACTION = 1
 LEARNING_RATE = 0.0001
 NUM_ACTIONS = 3
+
+IMG_SCALE_X = 128
+IMG_SCALE_Y = 128
                 
 class AI:
     def __init__(self):
@@ -50,7 +53,7 @@ class AI:
         self.epsilon = INITIAL_EPSILON
 
         x_t = skimage.color.rgb2gray(pg.surfarray.array3d(pg.display.get_surface()))
-        x_t = skimage.transform.resize(x_t, (80, 80))
+        x_t = skimage.transform.resize(x_t, (IMG_SCALE_X, IMG_SCALE_Y))
         # x_t = skimage.exposure.rescale_intensity(x_t, out_range=(0, 255))
 
         self.s_t = np.stack((x_t, x_t, x_t, x_t), axis=2) 
@@ -60,6 +63,8 @@ class AI:
             self.s_t.shape[1], 
             self.s_t.shape[2]
         )
+
+        self.old_mario_x = 0
 
         # Memory
         self.D = deque()
@@ -73,9 +78,9 @@ class AI:
             self.model.compile(loss='mse', optimizer=adam)
 
     def build_model(self):
-        X_input = Input((80, 80, 4))
+        X_input = Input((IMG_SCALE_X, IMG_SCALE_Y, 4))
 
-        X = Conv2D(32, (8, 8), strides=(4, 4), padding='same', input_shape=((80, 80, 4)))(X_input)
+        X = Conv2D(32, (8, 8), strides=(4, 4), padding='same', input_shape=((IMG_SCALE_X, IMG_SCALE_Y, 4)))(X_input)
         X = BatchNormalization(axis=3)(X)
         X = Activation('relu')(X)
 
@@ -134,6 +139,7 @@ class AI:
         mario_big = state['mario_big']
         mario_invincible = state['mario_invincible']
         mario_in_castle = state['mario_in_castle']
+        mario_x = state['mario_x']
 
         if mario_in_castle:
             r_t = r_t + 1
@@ -145,8 +151,9 @@ class AI:
             r_t = r_t + 0.6
         if mario_invincible:
             r_t = r_t + 0.7
-        if a_t[1] == 1:
+        if mario_x > self.old_mario_x:
             r_t = r_t + 0.1
+            self.old_mario_x = mario_x
 
         r_t = 1 if r_t > 1 else r_t
         r_t = -1 if r_t < -1 else r_t
@@ -154,7 +161,9 @@ class AI:
         terminal = True if mario_in_castle or mario_dead else False
 
         x_t = skimage.color.rgb2gray(screenshot)
-        x_t = skimage.transform.resize(x_t, (80, 80))
+        x_t = skimage.transform.resize(x_t, (IMG_SCALE_X, IMG_SCALE_Y))
+        # skimage.viewer.ImageViewer(x_t).show()
+
         # x_t = skimage.exposure.rescale_intensity(x_t, out_range=(0, 255))
         x_t = x_t.reshape(1, x_t.shape[0], x_t.shape[1], 1)
         s_t1 = np.append(x_t, self.s_t[:, :, :, :3], axis=3)
@@ -201,10 +210,4 @@ class AI:
             self.model.save_weights("model.h5", overwrite=True)
             with open("model.json", "w") as outfile:
                 json.dump(self.model.to_json(), outfile)
-
-        if r_t != 0:
-            print(
-                "TIMESTEP", self.t, "/ EPSILON", self.epsilon, \
-                "/ ACTION", action_index, "/ REWARD", r_t, \
-                "/ Q_MAX", np.max(Q_sa), "/ Loss", loss
-            )
+            print("TIMESTEP", self.t, "/ EPSILON", self.epsilon, "/ Loss", loss)
