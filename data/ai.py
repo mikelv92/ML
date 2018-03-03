@@ -47,7 +47,7 @@ IMG_SCALE_Y = 128
                 
 class AI:
     def __init__(self):
-        super().__init__()
+        #super().__init__()
         self.keyboard = Controller()
         self.model = self.build_model()
         self.epsilon = INITIAL_EPSILON
